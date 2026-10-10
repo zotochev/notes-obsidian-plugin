@@ -168,6 +168,20 @@ describe("locateEdit", () => {
     expect(applyEdit(fence(task("t1")), off!)).toBe(text);
   });
 
+  it("switches a block off with one # before the opening tag, for a task and an event alike", () => {
+    for (const kind of ["task", "event"]) {
+      const raw = `<${kind}>\n  <uid>t123</uid>\n  <summary>Позвонить в банк</summary>\n</${kind}>`;
+      const offText = "```xml\n#" + raw + "\n```";
+      const turnedOff = locateEdit(fence(raw), raw, 0, { raw, disabled: true });
+      expect(applyEdit(fence(raw), turnedOff!)).toBe(offText);
+      // The same text without a language on the fence is read the same way.
+      for (const text of [offText, "```\n#" + raw + "\n```"]) {
+        expect(findBlocks(text)[0]).toMatchObject({ disabled: true, fenced: true, raw, from: 0, to: text.length });
+      }
+      expect(applyEdit(offText, locateEdit(offText, raw, 0, { raw, disabled: false })!)).toBe(fence(raw));
+    }
+  });
+
   it("keeps the indent of a fenced block", () => {
     const text = "- item\n  ```xml\n  " + task("t1") + "\n  ```";
     expect(applyEdit(text, locateEdit(text, task("t1"), 0, on("t2"))!))
