@@ -1,0 +1,9 @@
+{
+  "id": "notes-events",
+  "name": "Notes Events",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "Панели и форма для блоков <event> и <task>, из которых notificator создаёт события и задачи Google.",
+  "author": "zotochev",
+  "isDesktopOnly": true
+}

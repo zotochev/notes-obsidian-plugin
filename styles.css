@@ -1,0 +1,60 @@
+.ne-panel {
+  --ne-color: var(--color-blue);
+  display: flex;
+  gap: 10px;
+  margin: 4px 0;
+  padding: 6px 12px;
+  border: 1px solid var(--background-modifier-border);
+  border-left: 3px solid var(--ne-color);
+  border-radius: var(--radius-s);
+  background: var(--background-primary-alt);
+  font-size: var(--font-ui-medium);
+  line-height: 1.4;
+  cursor: pointer;
+  white-space: normal;
+}
+.ne-panel:hover { border-color: var(--background-modifier-border-hover); border-left-color: var(--ne-color); }
+.ne-panel.ne-inline { display: inline-flex; vertical-align: middle; margin: 0 2px; }
+.ne-panel.ne-disabled { border-left-style: dashed; }
+.ne-panel.ne-disabled .ne-title { color: var(--text-faint); text-decoration: line-through; }
+
+.ne-color-blue { --ne-color: var(--color-blue); }
+.ne-color-green { --ne-color: var(--color-green); }
+.ne-color-purple { --ne-color: var(--color-purple); }
+.ne-color-red { --ne-color: var(--color-red); }
+.ne-color-orange { --ne-color: var(--color-orange); }
+.ne-color-yellow { --ne-color: var(--color-yellow); }
+.ne-color-pink { --ne-color: var(--color-pink); }
+.ne-color-cyan { --ne-color: var(--color-cyan); }
+
+.ne-row { align-items: center; }
+.ne-row .ne-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ne-row .ne-when, .ne-row .ne-error { flex-shrink: 0; font-size: var(--font-ui-small); }
+
+.ne-card { padding: 10px 14px; }
+.ne-body { flex: 1; min-width: 0; }
+.ne-head { display: flex; align-items: center; gap: 8px; }
+.ne-card .ne-title { font-weight: var(--font-semibold); }
+.ne-facts { display: flex; flex-wrap: wrap; gap: 2px 14px; margin-top: 4px; font-size: var(--font-ui-small); color: var(--text-muted); }
+.ne-fact { display: inline-flex; align-items: center; gap: 4px; }
+.ne-description { margin-top: 6px; font-size: var(--font-ui-small); color: var(--text-muted); white-space: pre-line; }
+
+.ne-when { color: var(--text-muted); }
+.ne-error { color: var(--text-error); }
+.ne-card .ne-error { margin-top: 4px; font-size: var(--font-ui-small); }
+
+.ne-icon { display: inline-flex; flex-shrink: 0; }
+.ne-icon svg { width: 16px; height: 16px; }
+.ne-kind { color: var(--ne-color); }
+.ne-dim { color: var(--text-faint); }
+
+/* A section of the reading view that holds only the tail of a block. */
+.ne-section.ne-empty { display: none; }
+
+.ne-modal .setting-item { padding: 8px 0; }
+.ne-modal textarea { width: 100%; resize: vertical; }
+.ne-modal .setting-item-control textarea { min-width: 260px; }
+.ne-xml { font-family: var(--font-monospace); font-size: var(--font-smaller); margin-bottom: 8px; }
+.ne-more { margin: 8px 0; }
+.ne-more > summary { cursor: pointer; color: var(--text-muted); font-size: var(--font-ui-small); }
+.ne-form-errors { color: var(--text-error); font-size: var(--font-ui-small); }
