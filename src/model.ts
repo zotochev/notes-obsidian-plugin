@@ -301,10 +301,24 @@ export function fenceEdits(text: string): Edit[] {
     }));
 }
 
-export function newUid(): string {
+/** A uid that none of the file's blocks has. */
+export function newUid(taken: ReadonlySet<string> = new Set()): string {
   const alphabet = "abcdefghijklmnopqrstuvwxyz0123456789";
-  const bytes = crypto.getRandomValues(new Uint8Array(8));
-  return Array.from(bytes, (b) => alphabet[b % alphabet.length]).join("");
+  for (;;) {
+    const bytes = crypto.getRandomValues(new Uint8Array(8));
+    const uid = Array.from(bytes, (b) => alphabet[b % alphabet.length]).join("");
+    if (!taken.has(uid)) return uid;
+  }
+}
+
+/** Every uid written in the text, in blocks switched off too: a new uid must differ from all of them. */
+export function allUids(text: string): Set<string> {
+  return new Set(Array.from(text.matchAll(/<uid>\s*([A-Za-z0-9]+)\s*<\/uid>/g), (m) => m[1]));
+}
+
+/** True when the service can have a Google event or task bound to this uid, so it must stay as it is. */
+export function isBoundUid(uid: string | undefined, otherUids: ReadonlySet<string>): boolean {
+  return uid !== undefined && UID_RE.test(uid) && !otherUids.has(uid);
 }
 
 /** uids of the blocks that are switched on, with how many times each occurs. */

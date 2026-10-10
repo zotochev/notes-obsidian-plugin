@@ -4,7 +4,7 @@ import type { EditorView } from "@codemirror/view";
 import { panelsExtension, refreshPanels } from "./editor";
 import { EditModal, EditResult } from "./modal";
 import {
-  Block, Kind, ViewMode, blockText, fenceEdits, findBlocks, newItem, newUid, parseItem, serializeItem, uidCounts, validate,
+  Block, Kind, ViewMode, allUids, blockText, fenceEdits, findBlocks, newItem, newUid, parseItem, serializeItem, uidCounts, validate,
 } from "./model";
 import { renderPanel } from "./panel";
 import { readingProcessor } from "./reading";
@@ -77,6 +77,7 @@ export default class NotesEventsPlugin extends Plugin {
       isNew: false,
       indent: block.indent,
       otherUids: new Set(uidCounts(text, others).keys()),
+      takenUids: allUids(text),
       source: block.raw,
       onSubmit: apply,
     }).open();
@@ -84,7 +85,8 @@ export default class NotesEventsPlugin extends Plugin {
 
   private insert(editor: Editor, kind: Kind): void {
     const item = newItem(kind);
-    item.fields.uid = newUid();
+    const takenUids = allUids(editor.getValue());
+    item.fields.uid = newUid(takenUids);
     if (kind === "event") {
       const start = new Date();
       start.setHours(start.getHours() + 1, 0, 0, 0);
@@ -95,6 +97,7 @@ export default class NotesEventsPlugin extends Plugin {
       isNew: true,
       indent: "",
       otherUids: new Set(uidCounts(editor.getValue()).keys()),
+      takenUids,
       source: serializeItem(item),
       onSubmit: (result) => {
         if (!result) return;

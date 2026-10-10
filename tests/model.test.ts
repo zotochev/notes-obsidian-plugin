@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  applyEdit, fenceEdits, findBlocks, formatWhen, locateEdit, newUid, parseItem, recurrenceLabel, serializeItem, uidCounts, validate,
+  allUids, applyEdit, fenceEdits, isBoundUid, findBlocks, formatWhen, locateEdit, newUid, parseItem, recurrenceLabel, serializeItem, uidCounts, validate,
 } from "../src/model";
 
 const EVENT = `<event>
@@ -206,5 +206,16 @@ describe("uids", () => {
 
   it("generates uids the service accepts", () => {
     expect(newUid()).toMatch(/^[a-z0-9]{8}$/);
+  });
+
+  it("collects every uid of the file, of blocks switched off too", () => {
+    expect(allUids("<task><uid>a</uid></task>\n#<task><uid> b </uid></task>")).toEqual(new Set(["a", "b"]));
+  });
+
+  it("holds a uid the service can use and lets a missing, wrong or repeated one go", () => {
+    expect(isBoundUid("a1", new Set(["b"]))).toBe(true);
+    expect(isBoundUid(undefined, new Set())).toBe(false);
+    expect(isBoundUid("a-1", new Set())).toBe(false);
+    expect(isBoundUid("a1", new Set(["a1"]))).toBe(false);
   });
 });
