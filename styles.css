@@ -57,4 +57,5 @@
 .ne-xml { font-family: var(--font-monospace); font-size: var(--font-smaller); margin-bottom: 8px; }
 .ne-more { margin: 8px 0; }
 .ne-more > summary { cursor: pointer; color: var(--text-muted); font-size: var(--font-ui-small); }
+.ne-modal .ne-warning { color: var(--text-warning); }
 .ne-form-errors { color: var(--text-error); font-size: var(--font-ui-small); }

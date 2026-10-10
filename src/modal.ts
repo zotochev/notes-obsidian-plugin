@@ -39,8 +39,10 @@ export class EditModal extends Modal {
   private xmlText: string;
   private errorsEl: HTMLElement | null = null;
   // The uid the block came with, when the service may have bound a Google event or task to it.
-  // Such a uid never changes here: with another uid the service would delete that event and make a new one.
+  // With another uid the service would delete that event and make a new one, so such a uid
+  // changes only after the user has asked for it with the button next to it.
   private boundUid: string | null;
+  private uidUnlocked = false;
 
   constructor(app: App, private item: Item, private opts: EditOptions) {
     super(app);
@@ -179,8 +181,11 @@ export class EditModal extends Modal {
       raw = serializeItem(item, this.opts.indent);
     }
     const errors = validate(item, this.opts.otherUids);
-    if (this.boundUid && item.fields.uid !== this.boundUid) {
-      errors.push(`uid менять нельзя: по нему сервис находит запись в Google. Верните uid ${this.boundUid}`);
+    if (this.boundUid && !this.uidUnlocked && item.fields.uid !== this.boundUid) {
+      errors.push(
+        `uid изменён: по нему сервис находит запись в Google. Верните uid ${this.boundUid} `
+        + "или нажмите «Изменить» у uid в форме, под «Ещё поля»",
+      );
     }
     if (errors.length) {
       this.errorsEl?.empty();
@@ -201,23 +206,44 @@ export class EditModal extends Modal {
     else delete this.item.meta[key];
   }
 
-  /** The uid is shown, not edited. A block whose uid the service cannot use may get a new one. */
+  /**
+   * A uid the service may have bound is shown, and is edited only after the user asks for it.
+   * A uid the service cannot use is edited straight away.
+   */
   private uid(parent: HTMLElement): void {
     const { item, opts } = this;
     const setting = new Setting(parent).setName("uid");
-    const value = setting.controlEl.createEl("code", { text: item.fields.uid ?? "" });
-    if (this.boundUid) {
-      setting.setDesc("Создаётся сам и не меняется: по нему сервис находит запись в Google.");
+
+    const editable = () => {
+      setting.controlEl.empty();
+      if (this.boundUid) {
+        setting.setDesc("С другим uid сервис удалит прежнюю запись в Google и создаст новую.");
+        setting.descEl.addClass("ne-warning");
+      } else if (item.fields.uid && opts.otherUids.has(item.fields.uid)) {
+        setting.setDesc("Такой uid уже есть в файле. Смените его у того блока, который появился позже: у первого по нему уже найдена запись в Google.");
+      } else {
+        setting.setDesc("Создаётся сам. Только латинские буквы и цифры.");
+      }
+      let input!: HTMLInputElement;
+      setting.addText((t) => {
+        t.setValue(item.fields.uid ?? "").onChange((v) => this.set("uid", v.trim()));
+        input = t.inputEl;
+      });
+      setting.addButton((b) => b.setButtonText("Новый uid").onClick(() => {
+        item.fields.uid = newUid(opts.takenUids);
+        input.value = item.fields.uid;
+      }));
+    };
+
+    if (!this.boundUid || this.uidUnlocked) {
+      editable();
       return;
     }
-    if (item.fields.uid && opts.otherUids.has(item.fields.uid)) {
-      setting.setDesc("Такой uid уже есть в файле. Выдайте новый тому блоку, который появился позже: у первого по нему уже найдена запись в Google.");
-    } else {
-      setting.setDesc("Создаётся сам. После сохранения не меняется.");
-    }
-    setting.addButton((b) => b.setButtonText("Новый uid").onClick(() => {
-      item.fields.uid = newUid(opts.takenUids);
-      value.setText(item.fields.uid);
+    setting.setDesc("Создаётся сам. По нему сервис находит запись в Google, поэтому менять его не нужно.");
+    setting.controlEl.createEl("code", { text: item.fields.uid ?? "" });
+    setting.addButton((b) => b.setButtonText("Изменить").onClick(() => {
+      this.uidUnlocked = true;
+      editable();
     }));
   }
 
