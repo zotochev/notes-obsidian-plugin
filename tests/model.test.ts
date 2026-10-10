@@ -204,8 +204,18 @@ describe("uids", () => {
     expect(uidCounts(text).get("a")).toBe(2);
   });
 
-  it("generates uids the service accepts", () => {
-    expect(newUid()).toMatch(/^[a-z0-9]{8}$/);
+  it("makes a uid of the date and time", () => {
+    expect(newUid(new Set(), new Date(2026, 3, 7, 11, 14, 0))).toBe("20260407111400");
+    expect(newUid()).toMatch(/^\d{14}$/);
+  });
+
+  it("adds a letter when the uid of this second is taken", () => {
+    const now = new Date(2026, 3, 7, 11, 14, 0);
+    expect(newUid(new Set(["20260407111400"]), now)).toBe("20260407111400a");
+    expect(newUid(new Set(["20260407111400", "20260407111400a"]), now)).toBe("20260407111400b");
+    const taken = new Set(["20260407111400"]);
+    for (let i = 0; i < 26; i++) taken.add("20260407111400" + String.fromCharCode(97 + i));
+    expect(newUid(taken, now)).toBe("20260407111400aa");
   });
 
   it("collects every uid of the file, of blocks switched off too", () => {

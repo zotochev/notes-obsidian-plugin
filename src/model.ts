@@ -301,14 +301,27 @@ export function fenceEdits(text: string): Edit[] {
     }));
 }
 
-/** A uid that none of the file's blocks has. */
-export function newUid(taken: ReadonlySet<string> = new Set()): string {
-  const alphabet = "abcdefghijklmnopqrstuvwxyz0123456789";
-  for (;;) {
-    const bytes = crypto.getRandomValues(new Uint8Array(8));
-    const uid = Array.from(bytes, (b) => alphabet[b % alphabet.length]).join("");
+/**
+ * A uid that none of the file's blocks has: the local date and time to the second, `20260407111400`.
+ * When that one is taken it gets a letter: `20260407111400a`, then `b`, and so on. A uid may hold
+ * only letters and digits, so the suffix has no separator.
+ */
+export function newUid(taken: ReadonlySet<string> = new Set(), now = new Date()): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const stamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}`
+    + `${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+  if (!taken.has(stamp)) return stamp;
+  for (let n = 0; ; n++) {
+    const uid = stamp + letters(n);
     if (!taken.has(uid)) return uid;
   }
+}
+
+/** 0 → a, 25 → z, 26 → aa. */
+function letters(n: number): string {
+  let out = "";
+  for (n += 1; n > 0; n = Math.floor((n - 1) / 26)) out = String.fromCharCode(97 + ((n - 1) % 26)) + out;
+  return out;
 }
 
 /** Every uid written in the text, in blocks switched off too: a new uid must differ from all of them. */
