@@ -63,15 +63,20 @@ export default class NotesEventsPlugin extends Plugin {
   }
 
   /** The panel of a block. `duplicate`: another block of the file has the same uid. */
-  panel(block: Block, duplicate: boolean, onClick: () => void): HTMLElement {
+  panel(block: Block, duplicate: boolean, getText: () => string, apply: (result: EditResult | null) => void): HTMLElement {
     const item = parseItem(block.raw, block.disabled);
     const errors = validate(item);
     if (duplicate) errors.push(`uid ${item.fields.uid} используется более одного раза`);
-    return renderPanel(item, { defaultView: this.settings.defaultView, errors, onClick });
+    return renderPanel(item, {
+      defaultView: this.settings.defaultView,
+      errors,
+      onClick: () => this.edit(block, getText(), apply),
+      onToggle: () => apply({ raw: block.raw, disabled: !block.disabled }),
+    });
   }
 
   /** Open the form for a block of `text`; `apply` gets the new block, or null to delete it. */
-  edit(block: Block, text: string, apply: (result: EditResult | null) => void): void {
+  private edit(block: Block, text: string, apply: (result: EditResult | null) => void): void {
     const others = findBlocks(text).filter((b) => !(b.from === block.from && b.raw === block.raw));
     new EditModal(this.app, parseItem(block.raw, block.disabled), {
       isNew: false,

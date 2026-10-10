@@ -44,14 +44,12 @@ export function readingProcessor(plugin: NotesEventsPlugin) {
       if (block.from >= from) {
         const uid = /<uid>\s*([A-Za-z0-9]+)\s*<\/uid>/.exec(block.raw)?.[1];
         const duplicate = !block.disabled && uid !== undefined && (counts.get(uid) ?? 0) > 1;
-        el.appendChild(plugin.panel(block, duplicate, () => {
-          plugin.edit(block, text, (result) => {
-            const file = plugin.app.vault.getAbstractFileByPath(ctx.sourcePath);
-            if (!(file instanceof TFile)) return;
-            void plugin.app.vault.process(file, (current) => {
-              const edit = locateEdit(current, block.raw, block.from, result);
-              return edit ? applyEdit(current, edit) : current;
-            });
+        el.appendChild(plugin.panel(block, duplicate, () => text, (result) => {
+          const file = plugin.app.vault.getAbstractFileByPath(ctx.sourcePath);
+          if (!(file instanceof TFile)) return;
+          void plugin.app.vault.process(file, (current) => {
+            const edit = locateEdit(current, block.raw, block.from, result);
+            return edit ? applyEdit(current, edit) : current;
           });
         }));
       }

@@ -227,8 +227,8 @@ export function parseIso(value: string | undefined): { date: string; time: strin
   return { date: `${y}-${mo}-${d}`, time: h ? `${h}:${mi}` : null, at };
 }
 
-/** When the event is or the task is due, as the panel shows it. */
-export function formatWhen(item: Item, now = new Date()): string {
+/** When the event is or the task is due, as the panel shows it. `compact` gives only the day and the hour an event starts. */
+export function formatWhen(item: Item, now = new Date(), compact = false): string {
   const f = item.fields;
   if (item.kind === "task") {
     const due = parseIso(f.due);
@@ -237,6 +237,7 @@ export function formatWhen(item: Item, now = new Date()): string {
   }
   const start = parseIso(f.start), end = parseIso(f.end);
   if (!start) return [f.start, f.end].filter(Boolean).join(" – ");
+  if (compact) return `${day(start.at, now, false)} ${clock(start.at)}`;
   const from = `${day(start.at, now, true)} · ${clock(start.at)}`;
   if (!f.end) return from;
   if (!end) return `${from} – ${f.end}`;

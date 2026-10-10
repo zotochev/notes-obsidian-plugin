@@ -114,6 +114,11 @@ describe("formatWhen", () => {
       .toBe("11 ноя 08:00 – 12 ноя 09:00");
   });
 
+  it("gives only the start when asked to be compact", () => {
+    expect(formatWhen(parseItem(EVENT), now, true)).toBe("11 ноя 08:00");
+    expect(formatWhen(parseItem("<task><due>2026-11-15</due></task>"), now, true)).toBe("до 15 ноя");
+  });
+
   it("adds the year when it is not the current one", () => {
     expect(when("<task><due>2027-01-05</due></task>")).toBe("до 5 янв 2027");
   });

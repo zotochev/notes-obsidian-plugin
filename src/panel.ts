@@ -6,6 +6,8 @@ export interface PanelOptions {
   defaultView: ViewMode;
   errors: string[];
   onClick: () => void;
+  // The switch on the panel was pressed: the block is to be switched on or off.
+  onToggle: () => void;
 }
 
 /** The panel shown in place of a block. */
@@ -15,11 +17,13 @@ export function renderPanel(item: Item, opts: PanelOptions): HTMLElement {
   const color = (COLORS as readonly string[]).includes(item.meta.color) ? item.meta.color : fallback;
   const failed = opts.errors.length > 0;
 
-  const el = createDiv({ cls: `ne-panel ne-${view} ne-color-${failed ? "red" : color}` });
+  // The panel sits in a wrapper: the editor lays out the element it is given in its own way,
+  // and the panel's own layout must not depend on that.
+  const wrap = createDiv({ cls: "ne-wrap" });
+  const el = wrap.createDiv({ cls: `ne-panel ne-${view} ne-color-${failed ? "red" : color}` });
   el.toggleClass("ne-disabled", item.disabled);
   el.toggleClass("ne-failed", failed);
   el.setAttribute("role", "button");
-  el.setAttribute("aria-label", item.disabled ? "Выключено. Нажмите, чтобы изменить" : "Нажмите, чтобы изменить");
   el.addEventListener("click", (e) => {
     // A link in the description opens the link, not the form.
     if ((e.target as HTMLElement).closest("a")) return;
@@ -34,17 +38,23 @@ export function renderPanel(item: Item, opts: PanelOptions): HTMLElement {
 
   if (view === "row") {
     icon(el, kindIcon, "ne-kind");
+    // The time has a column of its own, there even when empty, so that the titles of rows line up.
+    const time = el.createSpan({ cls: "ne-when", text: formatWhen(item, new Date(), true) });
+    if (when) time.setAttribute("aria-label", when);
+    // The gap comes from the styles; the space keeps the words apart where the styles are not applied.
+    el.appendText(" ");
     el.createSpan({ cls: "ne-title", text: title });
     if (failed) el.createSpan({ cls: "ne-error", text: opts.errors[0] });
-    else if (when) el.createSpan({ cls: "ne-when", text: when });
     if (repeat) icon(el, "repeat", "ne-dim").setAttribute("aria-label", repeat);
-    return el;
+    toggle(el, item, opts.onToggle);
+    return wrap;
   }
 
   const body = el.createDiv({ cls: "ne-body" });
   const head = body.createDiv({ cls: "ne-head" });
   icon(head, kindIcon, "ne-kind");
   head.createSpan({ cls: "ne-title", text: title });
+  toggle(head, item, opts.onToggle);
 
   const facts = body.createDiv({ cls: "ne-facts" });
   if (when) fact(facts, "clock", when);
@@ -57,7 +67,22 @@ export function renderPanel(item: Item, opts: PanelOptions): HTMLElement {
 
   if (item.fields.description) body.createDiv({ cls: "ne-description", text: item.fields.description });
   for (const error of opts.errors) body.createDiv({ cls: "ne-error", text: error });
-  return el;
+  return wrap;
+}
+
+/** The on/off switch; it looks like Obsidian's own toggles because it has their class. */
+function toggle(parent: HTMLElement, item: Item, onToggle: () => void): void {
+  const el = parent.createDiv({ cls: "checkbox-container ne-switch" });
+  el.toggleClass("is-enabled", !item.disabled);
+  el.setAttribute("role", "switch");
+  el.setAttribute("aria-checked", String(!item.disabled));
+  el.setAttribute("aria-label", item.disabled ? "Включить" : "Выключить");
+  el.addEventListener("click", (e) => {
+    e.preventDefault();
+    // The click is for the switch, not for the panel under it.
+    e.stopPropagation();
+    onToggle();
+  });
 }
 
 function icon(parent: HTMLElement, name: string, cls: string): HTMLElement {

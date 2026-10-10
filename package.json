@@ -1,6 +1,6 @@
 {
   "name": "notes-events",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Obsidian plugin: panels and a form for <event> and <task> blocks of notificator",
   "private": true,
   "type": "module",

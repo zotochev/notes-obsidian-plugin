@@ -14,7 +14,8 @@
   white-space: normal;
 }
 .ne-panel:hover { border-color: var(--background-modifier-border-hover); border-left-color: var(--ne-color); }
-.ne-panel.ne-inline { display: inline-flex; vertical-align: middle; margin: 0 2px; }
+.ne-wrap.ne-inline { display: inline-block; vertical-align: middle; }
+.ne-wrap.ne-inline .ne-panel { margin: 0 2px; }
 .ne-panel.ne-disabled { border-left-style: dashed; }
 .ne-panel.ne-disabled .ne-title { color: var(--text-faint); text-decoration: line-through; }
 
@@ -29,7 +30,10 @@
 
 .ne-row { align-items: center; }
 .ne-row .ne-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ne-row .ne-when, .ne-row .ne-error { flex-shrink: 0; font-size: var(--font-ui-small); }
+.ne-row .ne-when, .ne-row .ne-error { font-size: var(--font-ui-small); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Wide enough for "11 ноя 08:00"; a longer time is cut and shown in full on hover. */
+.ne-row .ne-when { flex: 0 0 6em; font-variant-numeric: tabular-nums; }
+.ne-row .ne-error { flex: 0 1 auto; max-width: 50%; }
 
 .ne-card { padding: 10px 14px; }
 .ne-body { flex: 1; min-width: 0; }
@@ -38,6 +42,9 @@
 .ne-facts { display: flex; flex-wrap: wrap; gap: 2px 14px; margin-top: 4px; font-size: var(--font-ui-small); color: var(--text-muted); }
 .ne-fact { display: inline-flex; align-items: center; gap: 4px; }
 .ne-description { margin-top: 6px; font-size: var(--font-ui-small); color: var(--text-muted); white-space: pre-line; }
+
+.ne-switch { flex-shrink: 0; margin-left: auto; align-self: center; }
+.ne-head .ne-title { flex: 1; min-width: 0; }
 
 .ne-when { color: var(--text-muted); }
 .ne-error { color: var(--text-error); }

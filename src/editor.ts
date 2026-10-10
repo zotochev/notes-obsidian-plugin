@@ -27,11 +27,9 @@ class PanelWidget extends WidgetType {
 
   toDOM(view: EditorView): HTMLElement {
     const { block } = this;
-    const el = this.plugin.panel(block, this.duplicate, () => {
-      this.plugin.edit(block, view.state.doc.toString(), (result) => {
-        const edit = locateEdit(view.state.doc.toString(), block.raw, view.posAtDOM(el), result);
-        if (edit) view.dispatch({ changes: edit });
-      });
+    const el = this.plugin.panel(block, this.duplicate, () => view.state.doc.toString(), (result) => {
+      const edit = locateEdit(view.state.doc.toString(), block.raw, view.posAtDOM(el), result);
+      if (edit) view.dispatch({ changes: edit });
     });
     el.toggleClass("ne-inline", this.inline);
     return el;
